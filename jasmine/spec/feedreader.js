@@ -1,72 +1,120 @@
-/* feedreader.js
- *
- * This is the spec file that Jasmine will read and contains
- * all of the tests that will be run against your application.
- */
+// This is the spec file that contains the Jasmine tests
 
-/* We're placing all of our tests within the $() function,
- * since some of these tests may require DOM elements. We want
- * to ensure they don't run until the DOM is ready.
- */
-$(function() {
-    /* This is our first test suite - a test suite just contains
-    * a related set of tests. This suite is all about the RSS
-    * feeds definitions, the allFeeds variable in our application.
-    */
-    describe('RSS Feeds', function() {
-        /* This is our first test - it tests to make sure that the
-         * allFeeds variable has been defined and that it is not
-         * empty. Experiment with this before you get started on
-         * the rest of this project. What happens when you change
-         * allFeeds in app.js to be an empty array and refresh the
-         * page?
-         */
-        it('are defined', function() {
+window.addEventListener('DOMContentLoaded', () => {
+    /* This suite is about the RSSfeeds definitions.
+     * The `allFeeds` variable in our application.
+     */
+    describe('RSS Feeds', function () {
+        // Make sure the `allFeeds` variable is defined and is not empty.
+        it('are defined', function () {
             expect(allFeeds).toBeDefined();
             expect(allFeeds.length).not.toBe(0);
         });
 
 
-        /* TODO: Write a test that loops through each feed
-         * in the allFeeds object and ensures it has a URL defined
-         * and that the URL is not empty.
+        /* Loops through each feed in the `allFeeds` object.
+         * Ensure the URL is defined and the URL is not empty.
          */
+        it('have URL\'s', function () {
+            allFeeds.forEach(value => {
+                expect(value.url).toBeDefined();
+                expect(value.url.length).not.toBe(0);
+            })
+        })
 
-
-        /* TODO: Write a test that loops through each feed
-         * in the allFeeds object and ensures it has a name defined
-         * and that the name is not empty.
+        /* Loops through each feed in the `allFeeds` object.
+         * Ensure name is defined and the name is not empty.
          */
+        it('have names', function () {
+            allFeeds.forEach(value => {
+                expect(value.name).toBeDefined();
+                expect(value.name.length).not.toBe(0);
+            })
+        })
     });
 
+    /* This suite is about the side menu.
+     * The side menu is the main navigation for the `header` tag.
+     */
+    describe('The menu', function () {
+        // Define reusable variables for DOM
+        beforeEach(function () {
+            $body = document.querySelector('body');
+            $slideMenuButton = document.querySelector('.menu-icon-link');
+        })
 
-    /* TODO: Write a new test suite named "The menu" */
+        // Ensure the menu element is hidden by default.
+        it('is hidden by default', function () {
+            expect($body).toHaveClass('menu-hidden');
+        });
 
-        /* TODO: Write a test that ensures the menu element is
-         * hidden by default. You'll have to analyze the HTML and
-         * the CSS to determine how we're performing the
-         * hiding/showing of the menu element.
+        // Ensure the menu element changes state on user click events.
+        it('changes visibility when clicked', function () {
+            // Simulate first click
+            $slideMenuButton.click();
+            expect($body).not.toHaveClass('menu-hidden');
+
+            // Simulate second click
+            $slideMenuButton.click();
+            expect($body).toHaveClass('menu-hidden');
+        });
+    });
+
+    /* This suite is about the entries nested in `.feed`.
+     * Loaded from a POST request.
+     */
+    describe('Initial Entries', function () {
+        // Load asynchronous content from `loadFeed` function
+        beforeEach(function (done) {
+            loadFeed(1, done);
+        });
+
+        /* Ensure the loadFeed invocation populates at least
+         * a single `.entry` element within the `.feed` container.
          */
+        it('populates with at least one entry', function () {
+            const $entries = document.querySelectorAll('.feed .entry');
+            expect($entries.length).toBeGreaterThan(0);
+        });
+    });
 
-         /* TODO: Write a test that ensures the menu changes
-          * visibility when the menu icon is clicked. This test
-          * should have two expectations: does the menu display when
-          * clicked and does it hide when clicked again.
-          */
+    /* This suite is about populating new entries.
+     * They should be different.
+     */
+    describe('New Feed Selection', function () {
 
-    /* TODO: Write a new test suite named "Initial Entries" */
-
-        /* TODO: Write a test that ensures when the loadFeed
-         * function is called and completes its work, there is at least
-         * a single .entry element within the .feed container.
-         * Remember, loadFeed() is asynchronous so this test will require
-         * the use of Jasmine's beforeEach and asynchronous done() function.
+        /* Initialize two NodeLists
+         * after two different `loadFeed` invocations
          */
+        beforeEach(function (done) {
+            loadFeed(0, function () {
+                $firstEntries = document.querySelectorAll('.feed .entry-link');
 
-    /* TODO: Write a new test suite named "New Feed Selection" */
+                loadFeed(1, function () {
+                    $secondEntries = document.querySelectorAll('.feed .entry-link');
 
-        /* TODO: Write a test that ensures when a new feed is loaded
-         * by the loadFeed function that the content actually changes.
-         * Remember, loadFeed() is asynchronous.
+                    // Finished async POST requests
+                    done();
+                });
+            });
+        });
+
+        /* Ensure a new feed is loaded by the `loadFeed` function
+         * that the content actually changes.
          */
-}());
+        it('should load different entries', function () {
+            if ($firstEntries.length === $secondEntries.length) {
+
+                // links should be different
+                $firstEntries.forEach((value, index) => {
+                    let firsLink = value.href;
+                    let secondLink = $secondEntries[index].href;
+
+                    expect(firsLink).not.toBe(secondLink);
+                })
+            } else {
+                expect($firstEntries.length).not.toBe($secondEntries.length);
+            }
+        });
+    });
+});
