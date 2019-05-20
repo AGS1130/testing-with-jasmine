@@ -9,7 +9,7 @@ In this project you are given a web-based application that reads RSS feeds. The 
 The project can be installed onto your computer by zip or with Git.
 
 If Git is installed:
- * `git clone: https://github.com/AGS1130/bugger.git`
+ * `git clone: https://github.com/AGS1130/testing-with-jasmine.git`
 
 To download the zip file, click the green **Clone or download** button on the upperight corner and select **Zip download**
 
